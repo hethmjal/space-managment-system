@@ -15,9 +15,7 @@ Dashboard
             <h4>
             </h4>
             <div class="mt-3 svg-icon svg-icon-primary svg-icon-2x d-flex justify-content-center">
-				
                 <img src="{{asset('logo.png')}}" width="430" alt="">
-
 			</div>
         </div>
     </div>

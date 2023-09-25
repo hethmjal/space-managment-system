@@ -35,8 +35,11 @@ class ChangeBookStatusnotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)->subject('Space managment system')
-        ->greeting("Dear {$this->book->name}!")
-        ->line("Your request to reserve a space has been {$this->book->status}!");
+            ->greeting("Dear {$this->book->name}!")
+            ->line("Your request to reserve a space has been {$this->book->status}!")
+            ->lineIf($this->book->status == 'accepted', "Your booking start in {$this->book->start_date} from {$this->book->from} to {$this->book->to} and end in {$this->book->end_date}" )
+            ->lineIf($this->book->status == 'accepted',"the space is {$this->book->space->name}")
+            ;
     }
 
     /**

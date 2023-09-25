@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Actions\BookingsAction;
+use App\Events\BookingStatusChanged;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
 use App\Models\Space;
 use App\Notifications\ChangeBookStatusnotification;
@@ -15,7 +18,7 @@ class BookingController extends Controller
     public function index()
     {
         $spaces = Space::get();
-        $bookings = Booking::latest()->get();
+        $bookings = Booking::latest()->lazy();
         return view('admin.booking.index',compact('bookings','spaces'));
     }
 
@@ -32,47 +35,18 @@ class BookingController extends Controller
         return $days;
     }
 
-    public function store(Request $request)
+    public function store(BookingRequest $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'space_id' => 'required',
-            'program_name' => 'required',
-            'from' => 'required',
-            'to' => 'required|after:from',
-            'start_date' => 'required|date|after_or_equal:now',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'email' => 'required',
-            'days' => 'required',
-        ]);
-       // dd($request->all());
-
        $space = Space::findOrFail($request->input('space_id'));
-        
-       // dd($space->bookings);
-       $available = $space->checkAvailability($request);
+        $available = $space->checkAvailability($request);
         if (!$available) {
-            return redirect()->route('bookings.index')->with('error','Space not available for selected dates');
+            return redirect()->route('bookings.index')
+            ->with('error','Space not available for selected dates');
         }
-
-
-       $book = Booking::create([
-            'name' => $request->input('name'),
-            'program_name' => $request->input('program_name'),
-            'user_id' => $request->input('user_id'),
-            'space_id' => $request->input('space_id'),
-            'start_date' => $request->input('start_date'),
-            'end_date' => $request->input('end_date'),
-            'from' => $request->input('from'),
-            'to' => $request->input('to'),
-            'email' => $request->input('email'),
-            'status' => 'accepted',
-            'days' => $request->input('days'),
-        ]);
-
+        $action = new BookingsAction();
+        $book = $action->createAction($request,'accepted');
        
         return redirect()->route('bookings.index')->with('success', 'Reservation successful');
-    
     }
 
     public function edit($id)
@@ -82,40 +56,18 @@ class BookingController extends Controller
         return view('admin.booking.edit',compact('book','spaces'));
     }
 
-    public function update(Request $request,$id)
+    public function update(BookingRequest $request,$id)
     {
         $book = Booking::findOrFail($id);
         $space = Space::findOrFail($request->input('space_id'));
-        $request->validate([
-            'name' => 'required',
-            'space_id' => 'required',
-            'program_name' => 'required',
-            'from' => 'required',
-            'to' => 'required|after:from',
-            'start_date' => 'required|date|after_or_equal:now',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'email' => 'required',
-            'days' => 'required',
-        ]);
-
-
+       
         $available = $space->checkAvailability($request,$id);
         if (!$available) {
             return redirect()->route('bookings.index')->with('error','Space not available for selected dates');
         }
         
-        $book->update([
-            'name' => $request->input('name'),
-            'program_name' => $request->input('program_name'),
-            'user_id' => $request->input('user_id'),
-            'space_id' => $request->input('space_id'),
-            'start_date' => $request->input('start_date'),
-            'end_date' => $request->input('end_date'),
-            'from' => $request->input('from'),
-            'to' => $request->input('to'),
-            'status' => 'accepted',
-            'days' => $request->input('days'),
-        ]);
+        $action = new BookingsAction();
+        $book = $action->updateAction($book,$request);
 
         return redirect()->route('bookings.index')->with('success', 'Book updated successful');
     }
@@ -135,43 +87,30 @@ class BookingController extends Controller
         $book = Booking::findOrFail($request->id);  
         $book->status = $request->status;
         $book->save();
-     
-        Notification::route('mail', $book->email)
-                ->notify(new ChangeBookStatusnotification($book));
+
+        event(new BookingStatusChanged($book));
         return $book;
     }
 
     public function search(Request $request)
     {
-        $spaces = Space::get();
-        $bookings = Booking::
-        when(request('status') , function ($q) use($request) {
-            return $q->where('status',$request->status);
-        })
-        ->when(request('space') , function ($q) use($request) {
-            return $q->where('space_id',$request->space);
-        })->
-        where(
-            function($q) use($request){
-                return $q
-                ->when(request('value') , function ($q) use($request) {
-                    return $q->where('email','LIKE',"%{$request->value}%")
-                    ->orWhere('name','LIKE',"%{$request->value}%")
-                    ->orWhere('program_name','LIKE',"%{$request->value}%")
-                    ->orWhere('start_date','LIKE',"%{$request->value}%")
-                    ->orWhere('end_date','LIKE',"%{$request->value}%")
-             
-                    ;
-                });
-            }
-        )
         
-       ->with('space')->latest()->get();
-
-  //    return $bookings;
+        $bookings = Booking::filter($request)->with('space')->latest()->get();
+        $spaces = Space::get();
         $html = '';
-
         foreach ($bookings as $index => $book) {
+         $html = $this->getHtml($book,$html,$index);
+        }
+        return response()->json([
+            'html' => $html,
+            'spaces'=>$spaces,
+            'bookings' => $bookings
+        ]);
+    }
+ 
+
+    private function getHtml($book,$html,$index){
+     
             $html = $html .' <tr>
                         <td>' . ($index + 1) . '</td>
                         <td>' . $book->name . '</td>
@@ -220,15 +159,7 @@ class BookingController extends Controller
                             </div>
                         </td>
                     </tr>';
-
-       
+    
+            return $html;
     }
-
-    return response()->json([
-        'html' => $html,
-        'spaces'=>$spaces,
-        'bookings' => $bookings
-    ]);
-    }
- 
 }

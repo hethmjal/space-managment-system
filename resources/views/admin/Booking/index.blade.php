@@ -10,7 +10,7 @@
      
         
         @if(session('success'))
-        <div class="alert alert-success" role="alert">
+        <div class="alert alert-success mb-3" role="alert">
           {{session('success')}}
         
         </div>    
@@ -44,7 +44,7 @@
                             <label for="searchstatus"> {{__('Status')}} </label>
                             <br>
                             <select name="status" id="searchstatus" onchange="search()">
-                                <option  value="">choose status</option>
+                                <option  value="">All</option>
                                 <option  value="accepted">accepted</option>
                                 <option value="pending">pending</option>
                                 <option  value="rejected">rejected</option>
@@ -56,7 +56,7 @@
                             <label  for="searchspace"> {{__('Space')}} </label>
                             <br>
                             <select name="space" id="searchspace" onchange="search()">
-                                <option  value="">choose space</option>
+                                <option  value="">All space</option>
                                 @foreach ($spaces as $space)
                                     
                              
@@ -161,6 +161,7 @@
                     </tr>
                     @endforeach
 
+                   
                 </tbody>
             </table>
         </div>

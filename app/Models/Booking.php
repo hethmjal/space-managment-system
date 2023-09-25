@@ -41,6 +41,28 @@ class Booking extends Model
     }
 
     
+    public function scopeFilter($query,$request)
+    {
+        return $query->when(request('status') , function ($q) use($request) {
+            return $q->where('status',$request->status);
+        })
+        ->when(request('space') , function ($q) use($request) {
+            return $q->where('space_id',$request->space);
+        })->
+        where(
+            function($q) use($request){
+                return $q->when(request('value') , function ($q) use($request) {
+                    return $q->where('email','LIKE',"%{$request->value}%")
+                    ->orWhere('name','LIKE',"%{$request->value}%")
+                    ->orWhere('program_name','LIKE',"%{$request->value}%")
+                    ->orWhere('start_date','LIKE',"%{$request->value}%")
+                    ->orWhere('end_date','LIKE',"%{$request->value}%")
+             
+                    ;
+                });
+            }
+        );
+    }
 
 
 

@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Bokking system</title>
+        <title>Gsg- Booking system</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -99,21 +99,21 @@
                                     <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="name"> {{__('Name')}} </label>
-                                            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name">
+                                            <input type="text" value="{{old('name')}}" class="form-control @error('name') is-invalid @enderror" name="name">
                                         </div>
                                     </div>
                 
-                                    <div class="col-12 col-md-12">
+                                    <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="email"> {{__('Email')}} </label>
-                                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email">
+                                            <input type="email" value="{{old('email')}}"class="form-control @error('email') is-invalid @enderror" name="email">
                                         </div>
                                     </div>
 
                                     <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="program_name"> {{__('program name')}} </label>
-                                            <input type="text" class="form-control @error('program_name') is-invalid @enderror" name="program_name">
+                                            <input type="text" value="{{old('program_name')}}" class="form-control @error('program_name') is-invalid @enderror" name="program_name">
                                         </div>
                                     </div>
                                    
@@ -121,21 +121,21 @@
                                     <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="start_date"> {{__('Start  date')}} </label>
-                                            <input type="date" name="start_date" class="form-control @error('start_date') is-invalid @enderror" >
+                                            <input type="date" name="start_date" value="{{old('start_date')}}" class="form-control @error('start_date') is-invalid @enderror" >
                                         </div>
                                     </div>
                 
                                     <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="end_date"> {{__('End date')}} </label>
-                                            <input type="date" name="end_date" class="form-control @error('end_date') is-invalid @enderror" >
+                                            <input type="date" name="end_date" value="{{old('end_date')}}" class="form-control @error('end_date') is-invalid @enderror" >
                                         </div>
                                     </div>
                 
                                     <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="from"> {{__('From')}} </label>
-                                            <input type="time" name="from" class="form-control @error('from') is-invalid @enderror" >
+                                            <input type="time" name="from" value="{{old('from')}}" class="form-control @error('from') is-invalid @enderror" >
                                         </div>
                                     </div>
                 
@@ -143,7 +143,7 @@
                                     <div class="col-12 col-md-12 mb-2">
                                         <div class="form-group">
                                             <label style="font-weight: bold" for="to"> {{__('To')}} </label>
-                                            <input type="time" name="to" class="form-control @error('to') is-invalid @enderror" >
+                                            <input type="time" name="to" value="{{old('to')}}" class="form-control @error('to') is-invalid @enderror" >
                                         </div>
                                     </div>
                 

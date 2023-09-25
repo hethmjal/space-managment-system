@@ -11,7 +11,7 @@
                     <h3 class="card-label bold-text">  {{__('Book')}}
                     </h3>
                     @if($errors->any())
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger mt-3">
                       <ul>
                         @foreach ($errors->all() as $err)
                             <li>{{$err}}</li>
